@@ -40,6 +40,13 @@ A simple encrypted udp proxy in python
 
 	remote 127.0.0.1 7071
 
+注释掉"redirect-gateway def1"这行（如果OpenVPN服务器有push "redirect-gateway def1"也要去掉），然后增加下面几行：
+
+	route 1.2.3.4 255.255.255.255 net_gateway
+	route 0.0.0.0 128.0.0.0 192.168.245.1
+	route 128.0.0.0 128.0.0.0 192.168.245.1
+
+
 这样就可以了。
 
 

@@ -40,7 +40,6 @@ A simple encrypted udp proxy in python
 
 	remote 127.0.0.1 7071
 
-
 这样就可以了。
 
 
