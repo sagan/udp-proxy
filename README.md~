@@ -44,7 +44,7 @@ A simple encrypted udp proxy in python
 
 	route 1.2.3.4 255.255.255.255 net_gateway
 
-这样就可以了。
+就可以了。
 
 
 
