@@ -1,0 +1,9 @@
+{
+    "server":"8.8.8.8",
+    "server_port":53,
+    "proxy": "1.2.3.4",
+    "proxy_port":53,
+    "client_port":53,
+    "password":"foobar",
+    "timeout":600
+}

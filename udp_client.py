@@ -1,0 +1,91 @@
+#!/usr/bin/env python
+
+# Super simple script that listens to a local UDP port and relays all packets to an arbitrary remote host.
+# Packets that the host sends back will also be relayed to the local UDP client.
+# Works with Python 2 and 3
+
+import os
+import hashlib
+import sys 
+import socket
+import struct
+import string
+import json
+import getopt
+
+def fail(reason):
+	sys.stderr.write(reason + '\n')
+	sys.exit(1)
+
+def get_table(key):
+    m = hashlib.md5()
+    m.update(key)
+    s = m.digest()
+    (a, b) = struct.unpack('<QQ', s)
+    table = [c for c in string.maketrans('', '')]
+    for i in xrange(1, 1024):
+        table.sort(lambda x, y: int(a % (ord(x) + i) - a % (ord(y) + i)))
+    return table
+
+#md5 hash 16 bytes
+def encrypt(data):
+	h = hashlib.md5(data).digest()
+	return (data + h).translate(encrypt_table)
+
+def decrypt(data):
+	de = data.translate(decrypt_table)
+	if len(de) <= 16:
+		return (False, '')
+	data = de[:-16]
+	h = de[-16:]
+	if hashlib.md5(data).digest() != h:
+		return (False, data)
+	return (True, data)
+
+if __name__ == '__main__':
+	os.chdir(os.path.dirname(__file__) or '.')
+	
+	try:
+		with open('config.json', 'rb') as f:
+			config = json.load(f)
+		SERVER = config['proxy']
+		SERVER_PORT = config['proxy_port']
+		PORT = config['client_port']
+		KEY = config['password']
+	except:
+		print "warning, config.json not found or can not be opened\n"
+
+	optlist, args = getopt.getopt(sys.argv[1:], 's:p:k:l:')
+	for key, value in optlist:
+		if key == '-p':
+			SERVER_PORT = int(value)
+		elif key == '-k':
+			KEY = value
+		elif key == '-l':
+			PORT = int(value)
+		elif key == '-s':
+			SERVER = value
+
+	encrypt_table = ''.join(get_table(KEY))
+	decrypt_table = string.maketrans(encrypt_table, string.maketrans('', ''))
+	try:
+		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		s.bind(('', PORT))
+	except:
+		fail('Failed to bind on port ' + str(PORT))
+
+	knownClient = None
+	knownServer = (SERVER, SERVER_PORT)
+	while True:
+		data, addr = s.recvfrom(65535)
+
+		if addr == knownServer:
+			result, data = decrypt(data)
+			if not result or knownClient is None:
+				continue
+			s.sendto(data, knownClient)
+		else:
+			knownClient = addr
+			s.sendto(encrypt(data), knownServer)
+
+
