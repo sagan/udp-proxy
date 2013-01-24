@@ -3,7 +3,7 @@ udp-proxy
 
 A simple encrypted udp proxy in python
 
-一个用Python写的简单的UDP代理，由服务器端(udp_server.py)和客户端(udp_client.py)两部分组成。参考shadowsocks的代码对传输数据做了简单混淆。
+一个用Python写的简单的UDP代理，由服务器端(udp_server.py)和客户端(udp_client.py)两部分组成。参考shadowsocks的代码对传输数据做了简单混淆。并且对长度较小的udp包在头部填充了一些随机字符（有实验结果表明GFW会特别干扰长度较小的udp数据包）。
 
 由于UDP的限制，一个服务端只能与一个客户端连接。
 
@@ -42,23 +42,11 @@ A simple encrypted udp proxy in python
 
 注释掉"redirect-gateway def1"这行（如果OpenVPN服务器有push "redirect-gateway def1"也要去掉），然后增加下面几行：
 
+	mssfix 1422
 	route 1.2.3.4 255.255.255.255 net_gateway
 	route 0.0.0.0 128.0.0.0
 	route 128.0.0.0 128.0.0.0
 
 
 这样就可以了。
-
-
-
-
-
-
-
-
-	
-		
-
-
-
 

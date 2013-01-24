@@ -23,14 +23,14 @@ def fail(reason):
 	sys.exit(1)
 
 def get_table(key):
-    m = hashlib.md5()
-    m.update(key)
-    s = m.digest()
-    (a, b) = struct.unpack('<QQ', s)
-    table = [c for c in string.maketrans('', '')]
-    for i in xrange(1, 1024):
-        table.sort(lambda x, y: int(a % (ord(x) + i) - a % (ord(y) + i)))
-    return table
+	m = hashlib.md5()
+	m.update(key)
+	s = m.digest()
+	(a, b) = struct.unpack('<QQ', s)
+	table = [c for c in string.maketrans('', '')]
+	for i in xrange(1, 1024):
+		table.sort(lambda x, y: int(a % (ord(x) + i) - a % (ord(y) + i)))
+	return table
 
 #md5 hash 16 bytes
 def encrypt(data):
