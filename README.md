@@ -34,6 +34,7 @@ A simple encrypted udp proxy in python
 然后修改OpenVPN客户端的配置文件：
 
 将
+
 	remote 1.2.3.4 1194
 
 改为
