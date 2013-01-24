@@ -12,6 +12,11 @@ import struct
 import string
 import json
 import getopt
+import random
+import operator
+
+def rand_bytes(num):
+	return reduce(operator.add, ('%c' % random.randint(0, 255) for i in range(num)))
 
 def fail(reason):
 	sys.stderr.write(reason + '\n')
@@ -30,14 +35,25 @@ def get_table(key):
 #md5 hash 16 bytes
 def encrypt(data):
 	h = hashlib.md5(data).digest()
-	return (data + h).translate(encrypt_table)
+	if len(data) <= 50:
+		padlength = 150
+	elif len(data) <= 100:
+		padlength = 100
+	elif len(data) <= 150:
+		padlength = 50
+	else:
+		padlength = 10
+	return (h + struct.pack('<H', padlength) + rand_bytes(padlength) + data).translate(encrypt_table)
 
+# hash(16) + padlength(unsigned int, 2) + pad + data
 def decrypt(data):
-	de = data.translate(decrypt_table)
-	if len(de) <= 16:
+	if len(data) <= 150:
 		return (False, '')
-	data = de[:-16]
-	h = de[-16:]
+	de = data.translate(decrypt_table)
+	padlength, = struct.unpack('<H', de[16:18]);
+	h = de[:16]
+	data = de[18 + padlength:]
+
 	if hashlib.md5(data).digest() != h:
 		return (False, data)
 	return (True, data)
